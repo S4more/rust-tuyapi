@@ -3,6 +3,7 @@ mod crc;
 pub mod error;
 pub mod mesparse;
 pub mod tuyadevice;
+pub mod rgbBulb;
 
 extern crate num;
 extern crate num_derive;
@@ -23,12 +24,17 @@ use std::convert::TryInto;
 
 pub enum TuyaType {
     Socket,
+    RGBBulb(rgbBulb::DpsStruct)
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Payload {
     Struct(PayloadStruct),
     String(String),
+}
+
+pub trait Dps {
+    fn dps(&self) -> HashMap<String, serde_json::Value>;
 }
 
 impl Payload {
@@ -180,6 +186,7 @@ pub fn get_payload(device_id: &str) -> Result<String> {
 fn dps(tt: TuyaType, state: &str) -> HashMap<String, serde_json::Value> {
     match tt {
         TuyaType::Socket => socket_dps(state),
+        TuyaType::RGBBulb(k)  => k.dps() 
     }
 }
 
